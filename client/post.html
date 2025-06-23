@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Post - MiniSocial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+       background-image: url('assets/s.jpeg');
+     background-repeat: no-repeat;
+      background-size: cover;
+      min-height: 100vh;
+    }
+
+
+    nav.navbar {
+      background-color: #6b4caf;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav.navbar .nav-links a,
+    nav.navbar .nav-links button {
+      color: white;
+      margin-left: 1rem;
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    nav.navbar .nav-links a:hover,
+    nav.navbar .nav-links button:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 2rem auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #6b4caf;
+    }
+
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #6b4caf;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #593b9d;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔝 NAVBAR same as dashboard -->
+  <nav class="navbar">
+    <h1>MiniSocial</h1>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="profile.html">My Profile</a>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- 📥 POST CREATE FORM -->
+  <div class="container">
+    <h2>Create a New Post</h2>
+    <form id="createPostForm" enctype="multipart/form-data">
+      <textarea id="postContent" placeholder="What's on your mind?" required></textarea>
+      <label>Upload an image (optional)</label>
+      <input type="file" id="imageUpload" accept="image/*">
+      <button type="submit">Post</button>
+    </form>
+  </div>
+
+  <script>
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("createPostForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const content = document.getElementById("postContent").value.trim();
+      const image = document.getElementById("imageUpload").files[0];
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Please login first!");
+        return window.location.href = "login.html";
+      }
+
+      const formData = new FormData();
+      formData.append("content", content);
+      if (image) formData.append("image", image);
+
+      try {
+        const res = await fetch("http://localhost:5000/api/posts/create", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("Post created successfully!");
+          window.location.href = "dashboard.html";
+        } else {
+          alert(data.message || "Failed to create post.");
+        }
+      } catch (err) {
+        console.error("Post Error:", err);
+        alert("Server error while creating post.");
+      }
+    });
+  </script>
+</body>
+</html>
